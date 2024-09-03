@@ -88,7 +88,40 @@ void displayAll() {
 
 
 void search() {
+    struct student s;
 
+    int rollNo;
+    printf("Enter roll: \n");
+    scanf("%d", &rollNo);
+
+    FILE *fp;
+
+    if ((fp = fopen(FILENAME, "rb")) == NULL) {
+        printf("Error Opening File\n");
+        return;
+    }
+
+    bool hasFound = false;
+
+    while (fread(&s, sizeof(struct student), 1, fp)) {
+        if (s.roll == rollNo) {
+            if (s.isDeleted) {
+                printf("Roll no is deleted.\n");
+            } else {
+                printf("Roll: %d, Name: %s\n", s.roll, s.name);
+                for (int i = 0; i < 5; i++) {
+                    printf("Marks in subject %d: %d\n", i + 1, (s.marks)[i]);
+                }
+            }
+
+            fclose(fp);
+            return;
+        }
+    }
+
+    printf("Cannot find record.\n");
+    fclose(fp);
+    return;
 }
 
 
