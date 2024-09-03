@@ -168,12 +168,42 @@ void editStudent() {
 
 
 void deleteLogical() {
+    FILE *fp;
 
+    if ((fp = fopen(FILENAME, "rb+")) == NULL) {
+        printf("Cannot open file!\n");
+        return;
+    }
+
+    int rollNo;
+    printf("Enter roll number: ");
+    scanf("%d", &rollNo);
+
+
+    int pos;
+    struct student s;
+    while (!feof(fp)) {
+        pos = ftell(fp);
+
+        fread(&s, sizeof(struct student), 1, fp);
+
+        if (s.roll == rollNo && !s.isDeleted) {
+            fseek(fp, pos, SEEK_SET);
+            s.isDeleted = true;
+
+            fwrite(&s, sizeof(struct student), 1, fp);
+            fclose(fp);
+            return;
+        }
+    }
+
+    fclose(fp);
+    printf("Could not found roll no.\n");
 }
 
 
 void deletePhysical() {
-
+    
 }
 
 
