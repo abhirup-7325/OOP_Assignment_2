@@ -91,7 +91,7 @@ void search() {
     struct student s;
 
     int rollNo;
-    printf("Enter roll: \n");
+    printf("Enter roll: ");
     scanf("%d", &rollNo);
 
     FILE *fp;
@@ -126,7 +126,44 @@ void search() {
 
 
 void editStudent() {
+    FILE *fp;
 
+    if ((fp = fopen(FILENAME, "rb+")) == NULL) {
+        printf("Cannot open file!\n");
+        return;
+    }
+
+    int rollNo;
+    printf("Enter roll number: ");
+    scanf("%d", &rollNo);
+
+
+    int pos;
+    struct student s;
+    while (!feof(fp)) {
+        pos = ftell(fp);
+
+        fread(&s, sizeof(struct student), 1, fp);
+
+        if (s.roll == rollNo && !s.isDeleted) {
+            fseek(fp, pos, SEEK_SET);
+
+            printf("Enter modified name: ");
+            scanf("%s", s.name);
+
+            for (int i = 0; i < 5; i++) {
+                printf("Enter marks in subject %d: ", i + 1);
+                scanf("%d", &((s.marks)[i]));
+            }
+
+            fwrite(&s, sizeof(struct student), 1, fp);
+            fclose(fp);
+            return;
+        }
+    }
+
+    fclose(fp);
+    printf("Could not found roll no.\n");
 }
 
 
