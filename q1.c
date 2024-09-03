@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 
 #define FILENAME "records.dat"
@@ -203,7 +204,71 @@ void deleteLogical() {
 
 
 void deletePhysical() {
-    
+    FILE *fp = fopen(FILENAME, "rb");
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    int fileSize = ftell(fp);
+    int recordCount = fileSize / sizeof(struct student);
+
+    if (recordCount == 0) {
+        printf("No records found.\n");
+        fclose(fp);
+        return;
+    }
+
+    struct student *students = (struct student *)malloc(recordCount * sizeof(struct student));
+    if (students == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(fp);
+        return;
+    }
+
+    fseek(fp, 0, SEEK_SET);
+    fread(students, sizeof(struct student), recordCount, fp);
+    fclose(fp);
+
+    int roll;
+    printf("Enter roll number to delete (physical): ");
+    scanf("%d", &roll);
+
+    bool hasFound = false;
+    int indexToDelete = -1;
+
+    for (int i = 0; i < recordCount; i++) {
+        if (students[i].roll == roll) {
+            hasFound = true;
+            indexToDelete = i;
+            break;
+        }
+    }
+
+    if (!hasFound) {
+        printf("Record not available, logically or physically!\n");
+        free(students);
+        return;
+    }
+
+    for (int i = indexToDelete; i < recordCount - 1; i++) {
+        students[i] = students[i + 1];
+    }
+
+    recordCount--;
+
+    fp = fopen(FILENAME, "wb");
+    if (fp == NULL) {
+        printf("Error reopening file.\n");
+        free(students);
+        return;
+    }
+
+    fwrite(students, sizeof(struct student), recordCount, fp);
+    fclose(fp);
+
+    free(students);
 }
 
 
